@@ -1,0 +1,104 @@
+using System;
+using Android;
+using Android.App;
+using Android.Content;
+//using Android.Graphics;
+using Android.Graphics.Drawables;
+using Android.OS;
+using Android.Provider;
+using Android.Runtime;
+using Android.Support.Design.Widget;
+using Android.Support.V4.View;
+using Android.Support.V4.Widget;
+using Android.Support.V7.App;
+using Android.Views;
+using Android.Widget;
+using HardCam = Android.Hardware.Camera2;
+using Android.Hardware;
+using Android.Hardware.Camera2;
+using System.Linq;
+using Android.Support.V4.App;
+using Xamarin.Forms;
+using System.IO;
+using Java.IO;
+using Android.Hardware.Camera2;
+using Java.Util;
+
+namespace Pie_Scanner
+{
+    [Activity(Label = "MyCameraActivity")]
+    public class MyCameraActivity : AppCompatActivity, Android.Hardware.Camera.IPictureCallback, Android.Hardware.Camera.IPreviewCallback, Android.Hardware.Camera.IShutterCallback, ISurfaceHolderCallback
+    {
+        Android.Hardware.Camera camera;
+        Bundle BundleBackup;
+        protected override void OnCreate(Bundle bundle)
+        {
+            base.OnCreate(bundle);
+            this.BundleBackup = bundle;
+            SetContentView(Resource.Layout.activity_main);
+
+            SurfaceView surface = (SurfaceView)FindViewById(Resource.Id.my_spy_the_pie_surface_view);
+            var holder = surface.Holder;
+            holder.AddCallback(this);
+            holder.SetType(Android.Views.SurfaceType.PushBuffers);
+
+            System.Timers.Timer Timer1 = new System.Timers.Timer();
+            Timer1.Start();
+            Timer1.Interval = 1000;
+            Timer1.Enabled = true;
+            Timer1.Elapsed += (sender,e) => {
+                camera.TakePicture(this, this, this);
+                camera.StartPreview();
+                Android.Hardware.Camera2.CameraCaptureSession 
+            };
+            Timer1.Start();
+        }
+
+        void Android.Hardware.Camera.IPictureCallback.OnPictureTaken(byte[] data, Android.Hardware.Camera camera)
+        {
+
+        }
+
+        void Camera.IPreviewCallback.OnPreviewFrame(byte[] b, Android.Hardware.Camera c)
+        {
+
+        }
+
+        void Camera.IShutterCallback.OnShutter()
+        {
+
+        }
+
+
+        public void SurfaceCreated(ISurfaceHolder holder)
+        {
+            try
+            {
+                camera = Android.Hardware.Camera.Open();
+                Android.Hardware.Camera.Parameters p = camera.GetParameters();
+                p.PictureFormat = Android.Graphics.ImageFormatType.Jpeg;
+                p.SetRotation(90);
+                camera.SetParameters(p);
+                camera.SetPreviewCallback(this);
+                camera.Lock();
+                camera.SetPreviewDisplay(holder);
+                
+                camera.StartPreview();
+            }
+            catch (System.IO.IOException e)
+            {
+            }
+        }
+
+        public void SurfaceDestroyed(ISurfaceHolder holder)
+        {
+            camera.Unlock();
+            camera.StopPreview();
+            camera.Release();
+        }
+
+        public void SurfaceChanged(ISurfaceHolder holder, Android.Graphics.Format f, int i, int j)
+        {
+        }
+    }
+}
